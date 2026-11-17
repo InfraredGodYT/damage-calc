@@ -756,3 +756,69 @@ table.field {
     top: 0;
     margin-top: 2px;
 }
+
+/*********************************************************
+ * Phone layout: stack the panels instead of laying the page out at
+ * a fixed ~1330px, which pushed the topbar off-screen on phones
+ *********************************************************/
+@media (max-width: 900px) {
+    html, body {
+        min-width: 0;
+    }
+    .wrapper {
+        padding: 0 8px;
+    }
+    .genSelection, .notationSelection, .modeSelection, .vanillaLabel {
+        top: 0;
+    }
+    .genSelection, .notationSelection, .modeSelection {
+        margin-bottom: 6px;
+    }
+    .move-result-group {
+        min-width: 0;
+        flex-direction: column;
+    }
+    .move-result-subgroup {
+        float: none;
+        width: 100%;
+        margin-bottom: 1em;
+    }
+    .panel {
+        float: none;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0 0 1em;
+    }
+    .poke-info, .field-info, .poke-import {
+        width: auto;
+        box-sizing: border-box;
+    }
+    /* fieldsets default to min-width: min-content, which stops them shrinking */
+    fieldset {
+        min-width: 0;
+    }
+    .poke-import textarea, .poke-import input {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    /* screen-reader-only text: without a width, its unwrapped text widens the page */
+    .visually-hidden {
+        width: 1px;
+    }
+    .credits {
+        padding: 20px 8px;
+    }
+    /* One vs All / All vs One: stack the inputs above the results, and let the
+       results table scroll sideways within its own box */
+    .flex-parent {
+        flex-direction: column;
+    }
+    .flex-parent > div {
+        min-width: 0;
+    }
+    #holder-0 {
+        overflow-x: auto;
+    }
+}
