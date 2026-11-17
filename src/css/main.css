@@ -756,15 +756,3 @@ table.field {
     top: 0;
     margin-top: 2px;
 }
-
-/* On narrow screens the calc keeps its wide desktop layout (scroll sideways or
-   pinch-zoom), but the topbar is pinned to the screen width so it isn't left
-   centred off-screen to the right */
-@media (max-width: 900px) {
-    header {
-        position: sticky;
-        left: 0;
-        width: 100vw;
-        box-sizing: border-box;
-    }
-}
