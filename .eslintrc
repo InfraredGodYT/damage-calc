@@ -25,6 +25,7 @@
         "notation": true,
         "SETDEX_CHAMPIONS": false,
         "SETDEX_SV": false,
+        "SETDEX_RC": false,
         "SETDEX_SS": false,
         "SETDEX_SM": false,
         "SETDEX_XY": false,

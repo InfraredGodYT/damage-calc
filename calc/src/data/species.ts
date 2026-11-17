@@ -1,5 +1,6 @@
 import type * as I from './interface';
 import {type DeepPartial, toID, extend, assignWithout} from '../util';
+import {RC_REMOVED_SPECIES, RC_SPECIES_PATCH} from './rc';
 
 export interface SpeciesData {
   readonly types: [I.TypeName] | [I.TypeName, I.TypeName];
@@ -10855,7 +10856,10 @@ for (const species of Object.values(CHAMPIONS)) {
   }
 }
 
-export const SPECIES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
+const RC: {[name: string]: SpeciesData} = extend(true, {}, SV, RC_SPECIES_PATCH);
+for (const name of RC_REMOVED_SPECIES) delete RC[name];
+
+export const SPECIES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, RC];
 
 export class Species implements I.Species {
   private readonly gen: I.GenerationNum;

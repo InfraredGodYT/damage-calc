@@ -1,5 +1,6 @@
 import type * as I from './interface';
 import {toID} from '../util';
+import {RC_NEW_ABILITIES} from './rc';
 
 const RBY: string[] = [];
 
@@ -565,7 +566,9 @@ const CHAMPIONS = [
   'Zero to Hero',
 ];
 
-export const ABILITIES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
+const RC = SV.concat(RC_NEW_ABILITIES);
+
+export const ABILITIES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, RC];
 
 export class Abilities implements I.Abilities {
   private readonly gen: I.GenerationNum;

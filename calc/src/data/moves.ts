@@ -1,5 +1,6 @@
 import type * as I from '../data/interface';
 import {type DeepPartial, toID, assignWithout, extend} from '../util';
+import {RC_MOVES_PATCH} from './rc';
 
 export interface MoveData {
   readonly name?: string;
@@ -41,6 +42,7 @@ export interface MoveData {
   readonly isPulse?: boolean;
   readonly isSlicing?: boolean;
   readonly isWind?: boolean;
+  readonly isKick?: boolean;
 }
 
 const RBY: {[name: string]: MoveData} = {
@@ -5495,7 +5497,9 @@ const CHAMPIONS: {[name: string]: MoveData} = extend(
 // @ts-expect-error readonly
 delete CHAMPIONS['Freeze-Dry'].secondaries;
 
-export const MOVES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
+const RC: {[name: string]: MoveData} = extend(true, {}, SV, RC_MOVES_PATCH);
+
+export const MOVES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV, RC];
 
 export class Moves implements I.Moves {
   private readonly gen: I.GenerationNum;
@@ -5564,6 +5568,7 @@ class Move implements I.Move {
     'maxPower',
     'isSlicing',
     'isWind',
+    'isKick',
   ]);
 
   constructor(name: string, data: MoveData, gen: number) {
@@ -5581,6 +5586,7 @@ class Move implements I.Move {
     if (data.isPulse) this.flags.pulse = 1;
     if (data.isSlicing) this.flags.slicing = 1;
     if (data.isWind) this.flags.wind = 1;
+    if (data.isKick) this.flags.kick = 1;
 
     assignWithout(this, data, Move.FLAGS);
 

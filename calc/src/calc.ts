@@ -22,6 +22,7 @@ const MECHANICS = [
   calculateSMSSSV,
   calculateSMSSSV,
   calculateSMSSSV,
+  calculateSMSSSV, // 10: Roria Conquest
 ];
 
 export function calculate(

@@ -37,7 +37,7 @@ function endsWith(string, target) {
 
 var LEGACY_STATS_RBY = ["hp", "at", "df", "sl", "sp"];
 var LEGACY_STATS_GSC = ["hp", "at", "df", "sa", "sd", "sp"];
-var LEGACY_STATS = [LEGACY_STATS_GSC, LEGACY_STATS_RBY, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC];
+var LEGACY_STATS = [LEGACY_STATS_GSC, LEGACY_STATS_RBY, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC, LEGACY_STATS_GSC];
 var HIDDEN_POWER_REGEX = /Hidden Power (\w*)/;
 
 var CALC_STATUS = {
@@ -97,7 +97,7 @@ $("input:radio[name='format']").change(function () {
 		$("input:checkbox[name='ruin']:checked").prop("checked", false);
 	}
 	$(".format-specific." + gameType.toLowerCase()).each(function () {
-		if ($(this).hasClass("gen-specific") && !$(this).hasClass("g" + gen)) {
+		if ($(this).hasClass("gen-specific") && !$(this).hasClass("g" + gen) && !(gen === 10 && $(this).hasClass("g9"))) {
 			return;
 		}
 		$(this).show();
@@ -280,6 +280,11 @@ $(".ability").bind("keyup change", function () {
 	if (gen !== 8) {
 		TOGGLE_ABILITIES.on.push('Intrepid Sword', 'Dauntless Shield');
 	}
+	if (gen === 10) {
+		// RC: Anticipation halves damage after sensing a dangerous move; Mountaineer
+		// blocks Rock moves on the turn it switches in
+		TOGGLE_ABILITIES.off.push('Anticipation', 'Mountaineer');
+	}
 
 	if (TOGGLE_ABILITIES.on.indexOf(ability) >= 0) {
 		$(this).closest(".poke-info").find(".abilityToggle").show();
@@ -302,8 +307,19 @@ $(".ability").bind("keyup change", function () {
 		boostedStat.hide();
 	}
 
-	if (ability === "Supreme Overlord") {
-		$(this).closest(".poke-info").find(".alliesFainted").show();
+	// RC's Anger Point stacks (+10% power per hit taken, max 5) reuse the allies fainted selector
+	var isAngerPoint = gen === 10 && ability === "Anger Point";
+	if (ability === "Supreme Overlord" || isAngerPoint) {
+		var counter = $(this).closest(".poke-info").find(".alliesFainted");
+		var NUMBER_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five"];
+		counter.find("option").each(function () {
+			var n = parseInt(this.value);
+			this.text = isAngerPoint ?
+				n + (n === 1 ? " hit" : " hits") + " taken" :
+				NUMBER_WORDS[n] + (n === 1 ? " ally" : " allies") + " fainted";
+		});
+		counter.attr("aria-label", isAngerPoint ? "Hits taken" : "Allies fainted");
+		counter.show();
 	} else {
 		$(this).closest(".poke-info").find(".alliesFainted").val('0');
 		$(this).closest(".poke-info").find(".alliesFainted").hide();
@@ -604,7 +620,7 @@ $(".item").change(function () {
 });
 
 function smogonAnalysis(pokemonName) {
-	var generation = ["champions", "rb", "gs", "rs", "dp", "bw", "xy", "sm", "ss", "sv"][gen];
+	var generation = ["champions", "rb", "gs", "rs", "dp", "bw", "xy", "sm", "ss", "sv", "sv"][gen];
 	if (pokemonName === "Aegislash-Shield" || pokemonName === "Aegislash-Both") pokemonName = "Aegislash";
 	return "https://smogon.com/dex/" + generation + "/pokemon/" + pokemonName.toLowerCase() + "/";
 }
@@ -1421,7 +1437,8 @@ var GENERATION = {
 	'6': 6, 'xy': 6, 'oras': 6,
 	'7': 7, 'sm': 7, 'usm': 7, 'usum': 7,
 	'8': 8, 'ss': 8,
-	'9': 9, 'sv': 9
+	'9': 9, 'sv': 9,
+	'10': 10, 'rc': 10
 };
 
 var SETDEX = [
@@ -1435,6 +1452,7 @@ var SETDEX = [
 	typeof SETDEX_SM === 'undefined' ? {} : SETDEX_SM,
 	typeof SETDEX_SS === 'undefined' ? {} : SETDEX_SS,
 	typeof SETDEX_SV === 'undefined' ? {} : SETDEX_SV,
+	typeof SETDEX_RC === 'undefined' ? {} : SETDEX_RC,
 ];
 
 /*
@@ -1510,15 +1528,18 @@ var RANDDEX = [
 	typeof GEN7RANDOMBATTLE === 'undefined' ? {} : GEN7RANDOMBATTLE,
 	GEN8RANDSETS,
 	GEN9RANDSETS,
+	{},
 ];
 var gen, genWasChanged, notation, pokedex, setdex, randdex, typeChart, moves, abilities, items, calcHP, calcStat, GENERATION;
 
 $(".gen").change(function () {
 	/*eslint-disable */
-	gen = ~~$(this).val() || 9;
+	gen = ~~$(this).val() || 10;
 	GENERATION = calc.Generations.get(gen);
+	// RC replaces Freeze with Frostbite (halves Sp. Atk instead of preventing moves)
+	$('option[value="Frozen"]').text(gen === 10 ? "Frostbite" : "Frozen");
 	var params = new URLSearchParams(window.location.search);
-	if (gen === 9) {
+	if (gen === 10) {
 		params.delete('gen');
 		params = '' + params;
 		if (window.history && window.history.replaceState) {
@@ -1547,8 +1568,9 @@ $(".gen").change(function () {
 	clearField();
 	$("#importedSets").prop("checked", false);
 	loadDefaultLists();
-	$(".gen-specific.g" + gen).show();
-	$(".gen-specific").not(".g" + gen).hide();
+	var genClass = ".g" + gen + (gen === 10 ? ", .g9" : "");
+	$(".gen-specific").filter(genClass).show();
+	$(".gen-specific").not(genClass).hide();
 	$("input:radio[name='format']").change();
 	var typeOptions = getSelectOptions(Object.keys(typeChart));
 	$("select.type1, select.move-type").find("option").remove().end().append(typeOptions);
@@ -1570,6 +1592,10 @@ function getFirstValidSetOption() {
 	// NB: The first set is never valid, so we start searching after it.
 	for (var i = 1; i < sets.length; i++) {
 		if (sets[i].id && sets[i].id.indexOf('(Blank Set)') === -1) return sets[i];
+	}
+	// No preset sets for this format (e.g. RC): fall back to the first blank set
+	for (var k = 0; k < sets.length; k++) {
+		if (sets[k].id) return sets[k];
 	}
 	return undefined;
 }
@@ -1916,7 +1942,9 @@ function loadCustomList(id) {
 
 $(document).ready(function () {
 	var params = new URLSearchParams(window.location.search);
-	var g = GENERATION[params.get('gen')] || 9;
+	var g = GENERATION[params.get('gen')] || 10;
+	// Random Battles and Other Metagames have no RC option, so they default to S/V
+	if (!$("#gen" + g).length) g = 9;
 	if ($("#champions").prop("checked")) {
 		/* eslint-disable */
 		g = 0;

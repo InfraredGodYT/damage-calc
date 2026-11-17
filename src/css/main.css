@@ -16,7 +16,7 @@ html {
     color: #333333;
 }
 body {
-    background: linear-gradient(to bottom, rgba(77, 93, 140, 0.6), rgba(77, 93, 140, 0.2) 80px, transparent 160px, transparent);
+    background: linear-gradient(to bottom, rgba(112, 72, 160, 0.6), rgba(112, 72, 160, 0.2) 80px, transparent 160px, transparent);
 }
 
 header {
@@ -704,4 +704,55 @@ table.field {
 
 .flex-parent {
 	display: flex;
+}
+
+/* ---------- Roria Conquest ---------- */
+
+.nav a.redbutton {
+    background: linear-gradient(to bottom, #b04a4a, #6b2424);
+}
+.nav a.redbutton:hover {
+    background: linear-gradient(to bottom, #cc5c5c, #823030);
+}
+.nav a.redbutton:active {
+    background: linear-gradient(to bottom, #6b2424, #b04a4a);
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.45), inset 0.5px 1px -1px rgba(255, 255, 255, 0.5);
+}
+.nav .nav-logo a, .nav .nav-logo a:visited, .nav .nav-logo a:hover, .nav .nav-logo a:active,
+.dark .nav .nav-logo a, .dark .nav .nav-logo a:hover, .dark .nav .nav-logo a:active {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+.nav .nav-logo img {
+    top: -8px;
+    left: 10px;
+    width: 114px;
+    height: 64px;
+}
+.nav a.greenbutton {
+    margin-left: 10px;
+}
+
+/* RC sits in its own group, apart from the vanilla generations */
+.rcSelection label[for="gen10"] {
+    border-radius: 6px;
+    font-weight: bold;
+}
+.vanillaLabel {
+    margin: 0 4px 0 10px;
+    font-size: 9pt;
+    opacity: 0.75;
+    /* match the -8px lift applied to the button groups beside it */
+    position: relative;
+    top: -8px;
+}
+/* With the RC group added, the formats no longer fit beside the generations,
+   so give them their own row instead of letting them wrap flush underneath */
+.modeSelection {
+    display: block;
+    top: 0;
+    margin-top: 2px;
 }

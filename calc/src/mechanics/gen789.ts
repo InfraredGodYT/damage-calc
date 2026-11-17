@@ -179,10 +179,14 @@ export function calculateSMSSSV(
     'Tera Shell', 'Thermal Exchange', 'Thick Fat', 'Unaware',
     'Vital Spirit', 'Volt Absorb', 'Water Absorb', 'Water Bubble',
     'Water Veil', 'Well-Baked Body', 'White Smoke', 'Wind Rider',
-    'Wonder Guard', 'Wonder Skin'
+    'Wonder Guard', 'Wonder Skin',
+    // Roria Conquest
+    'Inflate', 'Mountaineer', 'North Pole'
   );
 
-  const attackerIgnoresAbility = attacker.hasAbility('Mold Breaker', 'Teravolt', 'Turboblaze');
+  // RC: Stall moves ignore abilities (and type immunities, handled below)
+  const attackerIgnoresAbility = attacker.hasAbility('Mold Breaker', 'Teravolt', 'Turboblaze') ||
+    (gen.num === 10 && attacker.hasAbility('Stall'));
   const moveIgnoresAbility = move.named(
     'G-Max Drum Solo',
     'G-Max Fire Ball',
@@ -411,17 +415,24 @@ export function calculateSMSSSV(
     )
     : 1;
 
-  let typeEffectiveness = type1Effectiveness * type2Effectiveness;
+  // RC: Stall moves ignore type immunities, so an immune type counts as neutral
+  const stallIgnoresImmunity = gen.num === 10 && attacker.hasAbility('Stall');
+  const noImmunity = (eff: number) => (stallIgnoresImmunity && eff === 0 ? 1 : eff);
+
+  let typeEffectiveness = noImmunity(type1Effectiveness) * noImmunity(type2Effectiveness);
 
   if (defender.teraType && defender.teraType !== 'Stellar') {
-    typeEffectiveness = getMoveEffectiveness(
+    typeEffectiveness = noImmunity(getMoveEffectiveness(
       gen,
       move,
       defender.teraType,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
-    );
+    ));
+  }
+  if (stallIgnoresImmunity && (type1Effectiveness === 0 || type2Effectiveness === 0)) {
+    desc.attackerAbility = attacker.ability;
   }
 
   if (typeEffectiveness === 0 && move.hasType('Ground') &&
@@ -494,7 +505,11 @@ export function calculateSMSSSV(
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
       (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) ||
       (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
-      (move.flags.wind && defender.hasAbility('Wind Rider'))
+      (move.flags.wind && defender.hasAbility('Wind Rider')) ||
+      // RC: North Pole absorbs Ice moves; Mountaineer blocks Rock moves on the turn it switches in
+      (gen.num === 10 && move.hasType('Ice') && defender.hasAbility('North Pole')) ||
+      (gen.num === 10 && move.hasType('Rock') && defender.hasAbility('Mountaineer') &&
+        defender.abilityOn)
   ) {
     desc.defenderAbility = defender.ability;
     return result;
@@ -1086,7 +1101,9 @@ export function calculateBPModsSMSSSV(
     resistedKnockOffDamage = true;
   }
 
-  if ((move.named('Facade') && attacker.hasStatus('brn', 'par', 'psn', 'tox')) ||
+  // RC: Frostbite (the calc's 'frz' status) also powers up Facade
+  if ((move.named('Facade') && (attacker.hasStatus('brn', 'par', 'psn', 'tox') ||
+      (gen.num === 10 && attacker.hasStatus('frz')))) ||
     (move.named('Brine') && defender.curHP() <= defender.maxHP() / 2) ||
     (move.named('Venoshock') && defender.hasStatus('psn', 'tox')) ||
     (move.named('Lash Out') && (countBoosts(gen, attacker.boosts) < 0))
@@ -1168,9 +1185,12 @@ export function calculateBPModsSMSSSV(
 
   // Abilities
 
+  const isRC = gen.num === 10;
+
   // Use BasePower after moves with custom BP to determine if Technician should boost
   if ((attacker.hasAbility('Technician') && basePower <= 60) ||
-    (attacker.hasAbility('Flare Boost') &&
+    // RC: Flare Boost is an Atk/SpA modifier instead (see calculateAtModsSMSSSV)
+    (!isRC && attacker.hasAbility('Flare Boost') &&
       attacker.hasStatus('brn') && move.category === 'Special') ||
     (attacker.hasAbility('Toxic Boost') &&
       attacker.hasStatus('psn', 'tox') && move.category === 'Physical') ||
@@ -1224,8 +1244,12 @@ export function calculateBPModsSMSSSV(
     desc.attackerAbility = attacker.ability;
   }
 
-  if (field.attackerSide.isBattery && move.category === 'Special') {
-    bpMods.push(5325);
+  // RC: Battery is 1.2x and also boosts the holder's own special moves
+  if (isRC && attacker.hasAbility('Battery') && move.category === 'Special') {
+    bpMods.push(4915);
+    desc.attackerAbility = attacker.ability;
+  } else if (field.attackerSide.isBattery && move.category === 'Special') {
+    bpMods.push(isRC ? 4915 : 5325);
     desc.isBattery = true;
   }
 
@@ -1238,11 +1262,12 @@ export function calculateBPModsSMSSSV(
     if (attacker.gender === defender.gender) {
       bpMods.push(5120);
       desc.rivalry = 'buffed';
-    } else {
+      desc.attackerAbility = attacker.ability;
+    } else if (!isRC) { // RC: no penalty against the opposite gender
       bpMods.push(3072);
       desc.rivalry = 'nerfed';
+      desc.attackerAbility = attacker.ability;
     }
-    desc.attackerAbility = attacker.ability;
   }
 
   // The -ate abilities already changed move typing earlier, so most checks are done and desc is set
@@ -1252,9 +1277,17 @@ export function calculateBPModsSMSSSV(
   }
 
   if ((attacker.hasAbility('Reckless') && (move.recoil || move.hasCrashDamage)) ||
-      (attacker.hasAbility('Iron Fist') && move.flags.punch)
+      (!isRC && attacker.hasAbility('Iron Fist') && move.flags.punch) ||
+      // RC: Long Reach boosts moves that would make contact
+      (isRC && attacker.hasAbility('Long Reach') && move.flags.contact)
   ) {
     bpMods.push(4915);
+    desc.attackerAbility = attacker.ability;
+  } else if (isRC && (
+    (attacker.hasAbility('Iron Fist') && move.flags.punch) ||
+    (attacker.hasAbility('Striker') && move.flags.kick))
+  ) {
+    bpMods.push(5325);
     desc.attackerAbility = attacker.ability;
   }
 
@@ -1271,6 +1304,15 @@ export function calculateBPModsSMSSSV(
     bpMods.push(powMod[Math.min(5, attacker.alliesFainted)]);
     desc.attackerAbility = attacker.ability;
     desc.alliesFainted = attacker.alliesFainted;
+  }
+
+  // RC: Anger Point gives +10% power per damaging hit taken, up to 5 stacks.
+  // The UI reuses the alliesFainted selector for the stack count.
+  if (isRC && attacker.hasAbility('Anger Point') && attacker.alliesFainted) {
+    const stacks = Math.min(5, attacker.alliesFainted);
+    bpMods.push(Math.round((1 + 0.1 * stacks) * 4096));
+    desc.attackerAbility = attacker.ability;
+    desc.angerPointStacks = stacks;
   }
 
   // Items
@@ -1373,6 +1415,7 @@ export function calculateAtModsSMSSSV(
   desc: RawDesc
 ) {
   const atMods = [];
+  const isRC = gen.num === 10;
 
   // Slow Start also halves damage with special Z-moves
   if ((attacker.hasAbility('Slow Start') && attacker.abilityOn &&
@@ -1400,7 +1443,10 @@ export function calculateAtModsSMSSSV(
     desc.attackerAbility = attacker.ability;
   } else if (
     (attacker.hasAbility('Guts') && attacker.status && move.category === 'Physical') ||
-    (attacker.curHP() <= attacker.maxHP() / 3 &&
+    // RC: Flare Boost boosts both attacking stats while burned (burn still halves physical)
+    (isRC && attacker.hasAbility('Flare Boost') && attacker.hasStatus('brn')) ||
+    (isRC && attacker.hasAbility('Adrenaline') && attacker.curHP() <= attacker.maxHP() / 2) ||
+    (!isRC && attacker.curHP() <= attacker.maxHP() / 3 &&
       ((attacker.hasAbility('Overgrow') && move.hasType('Grass')) ||
        (attacker.hasAbility('Blaze') && move.hasType('Fire')) ||
        (attacker.hasAbility('Torrent') && move.hasType('Water')) ||
@@ -1420,8 +1466,19 @@ export function calculateAtModsSMSSSV(
   ) {
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
+  } else if (isRC && (
+    // RC: the starter abilities are a flat 1.2x at any HP, except in their own weather/terrain
+    (attacker.hasAbility('Overgrow') && move.hasType('Grass') && !field.hasTerrain('Grassy')) ||
+    (attacker.hasAbility('Blaze') && move.hasType('Fire') && !field.hasWeather('Sun')) ||
+    (attacker.hasAbility('Torrent') && move.hasType('Water') && !field.hasWeather('Rain')) ||
+    (attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
+    (attacker.hasAbility('Big Pecks') && move.hasType('Flying')))
+  ) {
+    atMods.push(4915);
+    desc.attackerAbility = attacker.ability;
   } else if (attacker.hasAbility('Transistor') && move.hasType('Electric')) {
-    atMods.push(gen.num >= 9 ? 5325 : 6144);
+    // Gen 9 nerfed Transistor to 1.3x; RC reverts it to 1.5x
+    atMods.push(gen.num === 9 ? 5325 : 6144);
     desc.attackerAbility = attacker.ability;
   } else if (attacker.hasAbility('Stakeout') && attacker.abilityOn) {
     atMods.push(8192);
@@ -1463,6 +1520,13 @@ export function calculateAtModsSMSSSV(
     atMods.push(2048);
     desc.defenderAbility = defender.ability;
   }
+
+  // RC: Freeze is replaced by Frostbite, which halves Special Attack
+  if (isRC && attacker.hasStatus('frz') && move.category === 'Special') {
+    atMods.push(2048);
+    desc.isFrostbitten = true;
+  }
+
   // Pokemon with "-of Ruin" Ability are immune to the opposing "-of Ruin" ability
   const isTabletsOfRuinActive = (defender.hasAbility('Tablets of Ruin') || field.isTabletsOfRuin) &&
     !attacker.hasAbility('Tablets of Ruin');
@@ -1588,7 +1652,8 @@ export function calculateDfModsSMSSSV(
   hitsPhysical = false
 ) {
   const dfMods = [];
-  if (defender.hasAbility('Marvel Scale') && defender.status && hitsPhysical) {
+  if ((defender.hasAbility('Marvel Scale') ||
+      (gen.num === 10 && defender.hasAbility('Inflate'))) && defender.status && hitsPhysical) {
     dfMods.push(6144);
     desc.defenderAbility = defender.ability;
   } else if (
@@ -1785,6 +1850,13 @@ export function calculateFinalModsSMSSSV(
 
   if (defender.hasAbility('Solid Rock', 'Filter', 'Prism Armor') && typeEffectiveness > 1) {
     finalMods.push(3072);
+    desc.defenderAbility = defender.ability;
+  }
+
+  // RC: Anticipation halves damage taken until the holder moves, if it sensed a
+  // super-effective or OHKO move on switch-in (the UI toggle says whether it did)
+  if (gen.num === 10 && defender.hasAbility('Anticipation') && defender.abilityOn) {
+    finalMods.push(2048);
     desc.defenderAbility = defender.ability;
   }
 

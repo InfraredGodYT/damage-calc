@@ -4,25 +4,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Pok&eacute;mon Damage Calculator</title>
-    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
+    <title>Damage Calculator - Pok&eacute;mon Brick Bronze Roria Conquest</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="./img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./img/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./img/android-chrome-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./img/apple-touch-icon.png">
     <link type="text/css" rel="stylesheet" href="./js/vendor/select2/select2.css" />
     <link type="text/css" rel="stylesheet" href="./css/main.css?" />
     <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="./css/dark-theme.css?" id="dark-theme-styles">
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-3"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'UA-26211653-3');
-
-        window.onerror = function(err, uri, line) {
-            gtag('event', 'exception', {'description': uri + ':' + line + ': ' + err});
-            return false;
-        };
+        // Upstream calls gtag() for analytics; this fork doesn't send analytics anywhere.
+        function gtag() {}
     </script>
     <!-- Immediately loads the dark theme in order to reduce FOIT -->
     <script>
@@ -39,12 +33,12 @@
 
 <header>
     <div class="nav-wrapper"><ul class="nav">
-        <li><a class="button nav-first" href="//pokemonshowdown.com/"><img src="./img/pokemonshowdownbeta.png" srcset="./img/pokemonshowdownbeta.png 1x, ./img/pokemonshowdownbeta@2x.png 2x" alt="Pok&eacute;mon Showdown" width="146" height="44" /> Home</a></li>
-        <li><a class="button" href="//pokemonshowdown.com/dex/">Pok&eacute;dex</a></li>
-        <li><a class="button" href="//replay.pokemonshowdown.com/">Replay</a></li>
-        <li><a class="button purplebutton" href="//smogon.com/dex/" target="_blank">Strategy</a></li>
-        <li><a class="button nav-last purplebutton" href="//smogon.com/forums/" target="_blank">Forum</a></li>
-        <li><a class="button greenbutton nav-first nav-last" href="//play.pokemonshowdown.com/">Play</a></li>
+        <li class="nav-logo"><a href="./" aria-label="Roria Conquest Damage Calculator"><img src="./img/RC_Logo.png" alt="Roria Conquest" width="114" height="64" /></a></li>
+        <li><a class="button nav-first redbutton" href="//pbblegacy.com/">Game Link</a></li>
+        <li><a class="button" href="//dex.pbblegacy.com/">Pok&eacute;dex</a></li>
+        <li><a class="button purplebutton" href="//pbblegacy.com/group">Group</a></li>
+        <li><a class="button nav-last" href="//pbblegacy.com/discord" target="_blank">Discord</a></li>
+        <li><a class="button greenbutton nav-first nav-last" href="//play.pbblegacy.com/">Showdown</a></li>
     </ul></div>
 </header>
 
@@ -1682,6 +1676,7 @@
     </script>
     <script type="text/javascript" src="./calc/util.js?"></script>
     <script type="text/javascript" src="./calc/stats.js?"></script>
+    <script type="text/javascript" src="./calc/data/rc.js?"></script>
     <script type="text/javascript" src="./calc/data/species.js?"></script>
     <script type="text/javascript" src="https://data.pkmn.cc/randbats/js/gen9randombattle.js?"></script>
     <script type="text/javascript" src="https://data.pkmn.cc/randbats/js/gen9randomdoublesbattle.js?"></script>
@@ -1723,8 +1718,8 @@
 </div>
 <!-- END WRAPPER -->
 
-<div class="credits">Created by Honko; maintained by Austin, Kris, <a href="https://github.com/smogon/damage-calc/contributors" class="links-lighten" target="_blank">and others</a>.
-    <ul><li><a href="https://www.smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/" class="links-lighten" target="_blank">Bug Reports</a></li>
+<div class="credits">Roria Conquest edition, based on the <a href="https://github.com/smogon/damage-calc" class="links-lighten" target="_blank">Pok&eacute;mon Showdown damage calculator</a>, created by Honko; maintained by Austin, Kris, <a href="https://github.com/smogon/damage-calc/contributors" class="links-lighten" target="_blank">and others</a>.
+    <ul><li><a href="//pbblegacy.com/discord" class="links-lighten" target="_blank">Bug Reports</a></li>
     <li><a href="https://github.com/smogon/damage-calc" class="links-lighten" target="_blank">GitHub repository</a></li></ul>
 
     <select id="dark-theme-toggle">

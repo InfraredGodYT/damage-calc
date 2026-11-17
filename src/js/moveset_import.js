@@ -19,7 +19,7 @@ function ExportPokemon(pokeInfo) {
 	finalText += "\n";
 	if (pokemon.ability) finalText += "Ability: " + pokemon.ability + "\n";
 	if (pokemon.level !== 100) finalText += "Level: " + pokemon.level + "\n";
-	if (gen === 9) {
+	if (gen >= 9) {
 		var teraType = pokeInfo.find(".teraType").val();
 		if (teraType !== undefined && teraType !== pokemon.types[0]) {
 			finalText += "Tera Type: " + teraType + "\n";

@@ -1,6 +1,6 @@
 export interface As<T> {__brand: T}
 export type ID = (string & As<'ID'>) | (string & { __isID: true }) | '';
-export type GenerationNum = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type GenerationNum = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10; // 10 = Roria Conquest
 export type GenderName = 'M' | 'F' | 'N';
 export type StatID = 'hp' | StatIDExceptHP;
 export type StatIDExceptHP = 'atk' | 'def' | 'spa' | 'spd' | 'spe';
@@ -95,6 +95,7 @@ export interface MoveFlags {
   pulse?: 1 | 0;
   slicing?: 1 | 0;
   wind?: 1| 0;
+  kick?: 1 | 0;
 }
 
 export interface SelfOrSecondaryEffect {
