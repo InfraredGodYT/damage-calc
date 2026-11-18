@@ -58,7 +58,7 @@ for (const entry of Object.values(forkDex)) {
 
 	if (!sv) {
 		// Species the calc doesn't know about: only add ones that are legal in RC.
-		if (entry.isNonstandard && entry.isNonstandard !== 'Past') continue;
+		if (entry.isNonstandard && entry.isNonstandard !== 'Past' && entry.isNonstandard !== 'RC') continue;
 		if (entry.num <= 0) continue;
 		const full = {types: entry.types, bs, weightkg: entry.weightkg};
 		if (ability0) full.abilities = {0: ability0};
@@ -100,7 +100,7 @@ for (const m of Object.values(forkMoves)) {
 	const sv = SV_MOVES[m.name];
 	const rc = convertMove(m);
 	if (!sv) {
-		if (m.isNonstandard && m.isNonstandard !== 'Past') continue;
+		if (m.isNonstandard && m.isNonstandard !== 'Past' && m.isNonstandard !== 'RC') continue;
 		movesPatch[m.name] = rc;
 		continue;
 	}
@@ -130,7 +130,7 @@ const removedSpecies = Object.keys(SV_SPECIES).filter(name => {
 
 // ---- Abilities (names only; effects live in mechanics code) ----
 const newAbilities = Object.values(forkAbilities)
-	.filter(a => a.name && a.name !== 'No Ability' && !SV_ABILITIES.has(a.name) && (!a.isNonstandard || a.isNonstandard === 'Past'))
+	.filter(a => a.name && a.name !== 'No Ability' && !SV_ABILITIES.has(a.name) && (!a.isNonstandard || a.isNonstandard === 'Past' || a.isNonstandard === 'RC'))
 	.map(a => a.name)
 	.sort();
 

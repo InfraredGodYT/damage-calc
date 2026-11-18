@@ -6427,6 +6427,14 @@ export const RC_MOVES_PATCH: {[name: string]: DeepPartial<MoveData>} = {
 	"Apple Acid": {
 		"bp": 90
 	},
+	"Aqua Jaws": {
+		"bp": 75,
+		"type": "Water",
+		"category": "Physical",
+		"target": "normal",
+		"makesContact": true,
+		"isBite": true
+	},
 	"Arm Thrust": {
 		"bp": 25
 	},
@@ -6479,6 +6487,15 @@ export const RC_MOVES_PATCH: {[name: string]: DeepPartial<MoveData>} = {
 	},
 	"Chatter": {
 		"bp": 70
+	},
+	"Chilling Nibble": {
+		"bp": 20,
+		"type": "Ice",
+		"category": "Physical",
+		"secondaries": true,
+		"target": "normal",
+		"makesContact": true,
+		"isBite": true
 	},
 	"Circle Throw": {
 		"priority": -6
@@ -6781,6 +6798,12 @@ export const RC_MOVES_PATCH: {[name: string]: DeepPartial<MoveData>} = {
 	"Strength": {
 		"type": "Rock"
 	},
+	"Tag Out": {
+		"bp": 0,
+		"type": "Normal",
+		"category": "Status",
+		"target": "self"
+	},
 	"Teleport": {
 		"priority": -6
 	},
@@ -6789,6 +6812,14 @@ export const RC_MOVES_PATCH: {[name: string]: DeepPartial<MoveData>} = {
 	},
 	"Thunderous Kick": {
 		"isKick": true
+	},
+	"Tidebreaker": {
+		"bp": 70,
+		"type": "Water",
+		"category": "Physical",
+		"secondaries": true,
+		"target": "normal",
+		"makesContact": true
 	},
 	"Trick Room": {
 		"priority": -7
@@ -6813,6 +6844,12 @@ export const RC_MOVES_PATCH: {[name: string]: DeepPartial<MoveData>} = {
 		"category": "Physical",
 		"target": "normal",
 		"makesContact": true
+	},
+	"Verdant Relay": {
+		"bp": 80,
+		"type": "Grass",
+		"category": "Special",
+		"target": "normal"
 	},
 	"Vital Throw": {
 		"priority": -1
